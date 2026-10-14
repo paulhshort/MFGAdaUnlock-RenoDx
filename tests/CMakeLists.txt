@@ -48,6 +48,20 @@ target_link_libraries(mfgunlock_local_low_overhead PRIVATE
   ${MFGUNLOCK_NATIVE_LIBRARIES})
 set_target_properties(mfgunlock_local_low_overhead PROPERTIES
   PREFIX "" SUFFIX ".addon64" OUTPUT_NAME "renodx-mfgunlock")
+add_library(mfgunlock_preset_c SHARED EXCLUDE_FROM_ALL ../src/addons/mfgunlock/addon.cpp)
+target_compile_definitions(mfgunlock_preset_c PRIVATE
+  $<TARGET_PROPERTY:mfgunlock_local_low_overhead,COMPILE_DEFINITIONS>
+  MFGUNLOCK_PRESET_C_310916)
+target_compile_options(mfgunlock_preset_c PRIVATE /bigobj)
+target_include_directories(mfgunlock_preset_c SYSTEM PRIVATE
+  $<TARGET_PROPERTY:mfgunlock_addon_compile,INCLUDE_DIRECTORIES>)
+target_link_libraries(mfgunlock_preset_c PRIVATE ${MFGUNLOCK_NATIVE_LIBRARIES})
+set_target_properties(mfgunlock_preset_c PROPERTIES PREFIX "" SUFFIX ".addon64" OUTPUT_NAME "renodx-mfgunlock-preset-c")
+add_executable(streamline_provider_probe streamline_provider_probe.cpp)
+target_compile_definitions(streamline_provider_probe PRIVATE $<TARGET_PROPERTY:mfgunlock_preset_c,COMPILE_DEFINITIONS>)
+target_compile_options(streamline_provider_probe PRIVATE /bigobj)
+target_include_directories(streamline_provider_probe SYSTEM PRIVATE $<TARGET_PROPERTY:mfgunlock_addon_compile,INCLUDE_DIRECTORIES>)
+target_link_libraries(streamline_provider_probe PRIVATE ${MFGUNLOCK_NATIVE_LIBRARIES})
 add_library(mfgunlock_border_axis_candidate SHARED EXCLUDE_FROM_ALL
   ../src/addons/mfgunlock/addon.cpp)
 target_compile_definitions(mfgunlock_border_axis_candidate PRIVATE
@@ -162,6 +176,9 @@ add_test(NAME runtime_version_tests COMMAND runtime_version_tests)
 add_executable(validation_status_tests validation_status_tests.cpp)
 add_test(NAME validation_status_tests COMMAND validation_status_tests)
 add_executable(provider_probe provider_probe.cpp)
+add_executable(release_provider_probe provider_probe.cpp)
+target_compile_definitions(release_provider_probe PRIVATE NOMINMAX MFGUNLOCK_LOCAL_LOW_OVERHEAD MFGUNLOCK_LOCAL_STABILITY MFGUNLOCK_CONTINUOUS_BORDER_AXES MFGUNLOCK_RELEASE_1_4_3 MFGUNLOCK_PRESET_C_310916)
+target_include_directories(release_provider_probe SYSTEM PRIVATE "${RENODX_SOURCE_DIR}/external/reshade")
 target_compile_definitions(provider_probe PRIVATE NOMINMAX)
 target_include_directories(provider_probe SYSTEM PRIVATE
   "${RENODX_SOURCE_DIR}/external/reshade")

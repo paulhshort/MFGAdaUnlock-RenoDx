@@ -40,6 +40,20 @@ inline constexpr bool Is(uint64_t packed, uint16_t major, uint16_t minor,
   return packed != 0 && packed == Pack(major, minor, patch, 0);
 }
 
+// Explicit ABI profiles, not an open-ended minimum-version bypass. Capability
+// queries, wrapper patch validation and transient/fixed fallback still apply.
+inline constexpr bool SupportsDynamicProvider(uint64_t packed) {
+  return Is(packed, 310, 9, 1) || Is(packed, 310, 9, 16);
+}
+
+inline constexpr bool SupportsDynamicWrapper(uint64_t packed) {
+  return Is(packed, 2, 14, 1) || Is(packed, 2, 14, 16);
+}
+
+inline constexpr bool ImplementsPresetC(uint64_t packed) {
+  return Is(packed, 310, 9, 16);
+}
+
 inline bool IsMappedImage(HMODULE module) {
   if (module == nullptr) return false;
   MEMORY_BASIC_INFORMATION info{};

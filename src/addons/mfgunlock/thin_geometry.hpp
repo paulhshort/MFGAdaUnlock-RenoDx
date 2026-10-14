@@ -118,6 +118,9 @@ struct ProviderProfile {
 constexpr ProviderProfile kProviderProfiles[] = {
     {0x6A8745ADu, 7565312u, "310.9.0"},
     {0x6A986031u, 7565312u, "310.9.1"},
+    // Only unchanged PTX identities below are eligible. The new 248-byte
+    // BlendCandidatesFused ABI and the Preset C FGLite kernel stay native.
+    {0x6AB69977u, 7618560u, "310.9.16"},
 };
 
 struct PtxProfile {

@@ -23,6 +23,22 @@ int main() {
   CHECK(!Is(Pack(2, 14, 1, 1), 2, 14, 1));
   CHECK(!Is(0, 2, 14, 1));
 
+  CHECK(SupportsDynamicProvider(dlssg));
+  CHECK(SupportsDynamicProvider(Pack(310, 9, 16, 0)));
+  CHECK(!SupportsDynamicProvider(Pack(310, 9, 16, 1)));
+  CHECK(!SupportsDynamicProvider(Pack(310, 9, 17, 0)));
+  CHECK(!SupportsDynamicProvider(Pack(310, 9, 0, 0)));
+  CHECK(!SupportsDynamicProvider(0));
+  CHECK(SupportsDynamicWrapper(streamline));
+  CHECK(SupportsDynamicWrapper(Pack(2, 14, 16, 0)));
+  CHECK(!SupportsDynamicWrapper(Pack(2, 14, 16, 1)));
+  CHECK(!SupportsDynamicWrapper(Pack(2, 14, 17, 0)));
+  CHECK(!SupportsDynamicWrapper(Pack(2, 13, 0, 0)));
+  CHECK(!SupportsDynamicWrapper(0));
+  CHECK(ImplementsPresetC(Pack(310, 9, 16, 0)));
+  CHECK(!ImplementsPresetC(dlssg));
+  CHECK(!ImplementsPresetC(0));
+
   HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
   const Version current = FromModule(kernel32);
   CHECK(current.valid);

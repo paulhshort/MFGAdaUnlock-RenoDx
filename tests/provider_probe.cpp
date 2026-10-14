@@ -105,6 +105,15 @@ int wmain(int argc, wchar_t** argv) {
     std::wcerr << L"LoadLibraryExW failed: " << GetLastError() << L'\n';
     return 3;
   }
+  std::vector<std::pair<unsigned char*,std::vector<unsigned char>>> original_sections;
+  auto* mapped=reinterpret_cast<unsigned char*>(module);
+  const auto* nt=reinterpret_cast<const IMAGE_NT_HEADERS64*>(mapped+reinterpret_cast<const IMAGE_DOS_HEADER*>(mapped)->e_lfanew);
+  const auto* section=IMAGE_FIRST_SECTION(nt);
+  for(WORD i=0;i<nt->FileHeader.NumberOfSections;++i,++section) {
+    if(!(section->Characteristics&IMAGE_SCN_MEM_READ))continue;
+    auto* start=mapped+section->VirtualAddress;
+    original_sections.emplace_back(start,std::vector<unsigned char>(start,start+section->Misc.VirtualSize));
+  }
 
   std::cout << "arch_gates=" << CountArchGates(module) << '\n';
   std::cout << "has_flip_meter_marker="
@@ -202,12 +211,22 @@ int wmain(int argc, wchar_t** argv) {
             << '\n';
   std::cout << "temporal_detail=" << detail << '\n';
   mfgunlock::midpoint::Restore(patches, allocation);
+  bool restored=true;
+  for(const auto& [address,bytes]:original_sections)
+    restored &= std::memcmp(address,bytes.data(),bytes.size())==0;
+  std::cout << "all_mapped_sections_restored=" << (restored?"yes":"no") << '\n';
+  // New Fused/FGLite code has a different ABI. Its rejection is required,
+  // while the unchanged scatter and geometry paths must still validate.
+  const bool new_native_blend=thin_provider_version=="310.9.16";
+  const bool blend_expected=new_native_blend
+      ? (!thin_result.validated_warp_blend.applied && thin_result.previous_scatter.applied)
+      : thin_result.validated_warp_blend.applied;
   FreeLibrary(module);
-  return temporal_supported && (!refined ||
-      (silhouette_result.refined_geometry && thin_result.validated_warp_blend.applied)) &&
+  return restored && temporal_supported && (!refined ||
+      (silhouette_result.refined_geometry && blend_expected)) &&
       (!geometry_v2 || silhouette_result.geometry_confidence_v2) &&
       (!adaptive ||
        (blackwell_result.adaptive_geometry &&
         blackwell_result.adaptive_inpaint_decision &&
-        thin_result.validated_warp_blend.applied)) ? 0 : 1;
+        blend_expected)) ? 0 : 1;
 }

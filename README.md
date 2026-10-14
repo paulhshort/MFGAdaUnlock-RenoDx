@@ -1,5 +1,11 @@
 # MFG Unlock
 
+> **Paul's 1.4.3-c1 compatibility fork:** supports the reviewed DLSS-G 310.9.16
+> and Streamline 2.14.16 providers while preserving upstream 1.4.3 kernels.
+> See [installation, build instructions and validation limits](docs/PRESET-C-FORK.md).
+> The upstream release notes and benchmarks below describe upstream behavior;
+> they are not performance measurements of this fork.
+
 > Release **1.4.3** adds continuous border-axis blending to the local stability
 > improvements introduced in 1.4.2, targeting abrupt border-confidence changes
 > during diagonal movement. It uses **Local Stable geometry + V2 Compatibility

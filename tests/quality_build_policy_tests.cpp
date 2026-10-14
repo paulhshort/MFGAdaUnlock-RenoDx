@@ -69,7 +69,7 @@ int main() {
     internal::ElfFingerprint fingerprint{};
     CHECK(internal::FingerprintElf(variant.data, variant.size, fingerprint));
     if (mechanism == "adaptive_quality_geometry_v31_local") {
-#if defined(MFGUNLOCK_LOCAL_STABILITY)
+#if defined(MFGUNLOCK_LOCAL_STABILITY) || defined(MFGUNLOCK_TABLE_RELEASE143)
       CHECK(fingerprint.text <= 39680u);  // Approved 1.4.2 paired-diagonal cubin.
 #else
       CHECK(fingerprint.text <= 39552u);
